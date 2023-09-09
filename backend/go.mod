@@ -5,17 +5,20 @@ go 1.21
 require (
 	github.com/99designs/gqlgen v0.17.37
 	github.com/go-chi/chi v1.5.5
+	github.com/gorilla/websocket v1.5.0
 	github.com/rs/cors v1.10.0
+	github.com/tmc/langchaingo v0.0.0-20230829032728-c85d3967da08
 	github.com/vektah/gqlparser/v2 v2.5.9
 )
 
 require (
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
+	github.com/dlclark/regexp2 v1.8.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.3 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/pkoukk/tiktoken-go v0.1.2 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/urfave/cli/v2 v2.25.5 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect

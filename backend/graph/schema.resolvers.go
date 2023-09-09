@@ -7,6 +7,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/tmc/sdgui/backend/graph/model"
 )
@@ -33,12 +34,23 @@ func (r *subscriptionResolver) ObserveProgram(ctx context.Context, id string) (<
 
 // TestSubscription is the resolver for the testSubscription field.
 func (r *subscriptionResolver) TestSubscription(ctx context.Context) (<-chan string, error) {
-	panic(fmt.Errorf("not implemented: TestSubscription - testSubscription"))
+	ch := make(chan string, 1)
+	go func() {
+		for i := 0; i < 100; i++ {
+			select {
+			case ch <- fmt.Sprintf("Hello! These are generated from the go backend. (iter: %d)", i):
+			default:
+				return
+			}
+			time.Sleep(1 * time.Second)
+		}
+	}()
+	return ch, nil
 }
 
 // GenericCompletion is the resolver for the genericCompletion field.
 func (r *subscriptionResolver) GenericCompletion(ctx context.Context, prompt string) (<-chan *model.GenericCompletionChunk, error) {
-	panic(fmt.Errorf("not implemented: GenericCompletion - genericCompletion"))
+	return r.genericCompletion(ctx, prompt)
 }
 
 // Mutation returns MutationResolver implementation.
