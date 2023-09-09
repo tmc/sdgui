@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/rs/cors"
@@ -32,19 +31,19 @@ func main() {
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 	// playgorund:
-	router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
+	router.HandleFunc("/", renderApolloSandbox)
 	router.Handle("/graphql", srv)
 
 	cors := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{"*"},
-		AllowedHeaders:   []string{"*"},
-		ExposedHeaders:   []string{"Link"},
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{"GET", "POST"},
+		AllowedHeaders: []string{"*"},
+		// ExposedHeaders:   []string{"Link"},
 		AllowCredentials: true,
 		// Debug:            true,
 	})
 
-	log.Printf("Listening on localhost:%s", port)
+	log.Printf("Listening on http://localhost:%s", port)
 
 	log.Fatal(http.ListenAndServe(":"+port, cors.Handler(router)))
 }
