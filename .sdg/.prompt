@@ -1,0 +1,91 @@
+We're building a program synthesis tool with a frontend and a backend.
+
+Each subdirectory should have a makefile with the following targets:
+* run-dev (runs the code locally in development mode)
+* deps (install dependencies via homebrew if needed (run-dev should depend on this)
+
+# backend
+Write a gqlgen based go backend in the ./backend directory.
+
+The go module name/path is "github.com/tmc/sdgui/backend" for the backend.
+
+Use /graphql as the serving endpoint.
+
+Create few subdirectories/subpackages.
+
+# frontend
+Write a vite+react+typescript frontend in the ./ui directory.
+
+Include these node scripts:
+    "graphql-codegen": "graphql-codegen",
+    "graphql-codegen-watch": "graphql-codegen --watch"
+
+Use @apollo/cient for the client code.
+
+
+Verbatim GraphQL Schema:
+```graphql
+# Supervised Program Synthesis system.
+
+type Query {}
+
+type Mutation {
+    createProgram(description: String!): Program!
+    regenerateProgram(input: RegenerateProgramInput!): Program!
+}
+
+type Subscription {
+    observeProgram(id: ID!): Program!
+}
+
+input RegenerateProgramInput {
+    newDescription: String!
+    filesToRegenerate: [ID!]!
+}
+
+type Program {
+    id: ID!
+    description: String!
+
+    files: [File!]
+    sharedDependencies: [Dependency!]
+}
+
+enum GenerationStatus {
+    PENDING
+    RUNNING
+    FINISHED
+    FAILED
+}
+
+type File {
+    path: String!
+    rationale: String!
+    generationStatus: GenerationStatus!
+    content: String!
+}
+
+type Dependency {
+    name: String!
+    description: String!
+    symbols: Map<String, String>!
+}
+```
+
+Verbatim codegen.ts file:
+```
+import { CodegenConfig } from '@graphql-codegen/cli'
+
+const config: CodegenConfig = {
+    schema: '../backend/schema.graphql',
+    documents: ['src/**/*.tsx'],
+    ignoreNoDocuments: true,
+    generates: {
+        './src/gql-gen/': {
+            preset: 'client'
+        }
+    }
+}
+
+export default config
+```

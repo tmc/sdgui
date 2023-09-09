@@ -1,0 +1,34 @@
+- name: Go
+  description: Programming language used for the backend application. Required for building and running the application.
+  symbols:
+    Makefile: Shared build system to automate the process of building the Go backend.
+    go.mod: Go module file indicating the module path and its dependency requirements.
+    go.sum: Go checksum file containing expected cryptographic hashes of the content of specific module versions.
+    graphql.go: Go file for GraphQL handlers
+    main.go: Go application entry point.
+    resolvers.go: Go file containing Gqlgen resolvers for the GraphQL queries.
+    server.go: Go file for managing the GraphQL server lifecyle.
+- name: TypeScript
+  description: Programming language used for the frontend application. Required for type safety and improved developer experience.
+  symbols:
+    App.tsx: Main application component.
+    codegen.ts: Config file for generating TypeScript types from the GraphQL schema.
+    index.tsx: Front-end entry point.
+    tsconfig.json: Configuration file for TypeScript project. Describes how the TypeScript compiler should translate TypeScript into JavaScript.
+- name: React
+  description: JavaScript library used for building user interfaces.
+  symbols:
+    App.tsx: Main React application component.
+    index.tsx: React entry point for the app
+- name: GraphQL
+  description: Data query and manipulation language for APIs used in both frontend and backend.
+  symbols:
+    codegen.ts: Configuration file for generating client side GraphQL queries/mutations/subscriptions
+    resolvers.go: File that resolves the GraphQL requests on the backend.
+    schema.graphql: GraphQL schema describing the types and available actions within the system.
+    server.go: Go file to create and run the GraphQL server.
+- name: Vite
+  description: Development server and build tool for modern web projects, it is used for hot-module replacement in frontend development.
+  symbols:
+    .env.development: Contains environment variables necessary for Vite during development.
+    package.json: Contains Vite among the dependencies and has scripts for running Vite.
