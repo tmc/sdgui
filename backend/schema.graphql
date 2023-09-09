@@ -1,0 +1,44 @@
+# Supervised Program Synthesis system.
+
+type Query {}
+
+type Mutation {
+    createProgram(description: String!): Program!
+    regenerateProgram(input: RegenerateProgramInput!): Program!
+}
+
+type Subscription {
+    observeProgram(id: ID!): Program!
+}
+
+input RegenerateProgramInput {
+    newDescription: String!
+    filesToRegenerate: [ID!]!
+}
+
+type Program {
+    id: ID!
+    description: String!
+    files: [File!]
+    sharedDependencies: [Dependency!]
+}
+
+enum GenerationStatus {
+    PENDING
+    RUNNING
+    FINISHED
+    FAILED
+}
+
+type File {
+    path: String!
+    rationale: String!
+    generationStatus: GenerationStatus!
+    content: String!
+}
+
+type Dependency {
+    name: String!
+    description: String!
+    symbols: Map<String, String>!
+}
