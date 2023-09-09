@@ -31,6 +31,16 @@ func (r *subscriptionResolver) ObserveProgram(ctx context.Context, id string) (<
 	panic(fmt.Errorf("not implemented: ObserveProgram - observeProgram"))
 }
 
+// TestSubscription is the resolver for the testSubscription field.
+func (r *subscriptionResolver) TestSubscription(ctx context.Context) (<-chan string, error) {
+	panic(fmt.Errorf("not implemented: TestSubscription - testSubscription"))
+}
+
+// GenericCompletion is the resolver for the genericCompletion field.
+func (r *subscriptionResolver) GenericCompletion(ctx context.Context, prompt string) (<-chan *model.GenericCompletionChunk, error) {
+	panic(fmt.Errorf("not implemented: GenericCompletion - genericCompletion"))
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 

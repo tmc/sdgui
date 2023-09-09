@@ -1,4 +1,5 @@
 /* eslint-disable */
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -37,6 +38,12 @@ export enum GenerationStatus {
   Running = 'RUNNING'
 }
 
+export type GenericCompletionChunk = {
+  __typename?: 'GenericCompletionChunk';
+  isLast: Scalars['Boolean']['output'];
+  text: Scalars['String']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   createProgram: Program;
@@ -73,7 +80,14 @@ export type RegenerateProgramInput = {
 
 export type Subscription = {
   __typename?: 'Subscription';
+  genericCompletion?: Maybe<GenericCompletionChunk>;
   observeProgram: Program;
+  testSubscription: Scalars['String']['output'];
+};
+
+
+export type SubscriptionGenericCompletionArgs = {
+  prompt: Scalars['String']['input'];
 };
 
 
@@ -86,3 +100,13 @@ export type SymbolMap = {
   key: Scalars['String']['output'];
   value: Scalars['String']['output'];
 };
+
+export type GenericSubscriptionSubscriptionVariables = Exact<{
+  prompt: Scalars['String']['input'];
+}>;
+
+
+export type GenericSubscriptionSubscription = { __typename?: 'Subscription', genericCompletion?: { __typename?: 'GenericCompletionChunk', text: string, isLast: boolean } | null };
+
+
+export const GenericSubscriptionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"GenericSubscription"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"prompt"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"genericCompletion"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"prompt"},"value":{"kind":"Variable","name":{"kind":"Name","value":"prompt"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"text"}},{"kind":"Field","name":{"kind":"Name","value":"isLast"}}]}}]}}]} as unknown as DocumentNode<GenericSubscriptionSubscription, GenericSubscriptionSubscriptionVariables>;

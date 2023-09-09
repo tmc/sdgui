@@ -6,6 +6,10 @@ run-dev: deps
 deps:
 	npm install
 
+.PHONY: generate
+generate:
+	npm run graphql-codegen
+
 .PHONY: watch-codegen
 watch-codegen:
 	npm run graphql-codegen-watch

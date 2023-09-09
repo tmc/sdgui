@@ -21,6 +21,11 @@ type File struct {
 	Content          string           `json:"content"`
 }
 
+type GenericCompletionChunk struct {
+	Text   string `json:"text"`
+	IsLast bool   `json:"isLast"`
+}
+
 type Program struct {
 	ID                 string        `json:"id"`
 	Description        string        `json:"description"`

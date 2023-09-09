@@ -11,6 +11,13 @@ type Mutation {
 
 type Subscription {
     observeProgram(id: ID!): Program!
+    testSubscription: String!
+    genericCompletion(prompt: String!): GenericCompletionChunk
+}
+
+type GenericCompletionChunk {
+  text: String!
+  isLast: Boolean!
 }
 
 input RegenerateProgramInput {
