@@ -1,0 +1,41 @@
+// api.js
+import { ApolloClient, InMemoryCache, gql, ApolloProvider, useQuery } from '@apollo/client';
+
+const client = new ApolloClient({
+  uri: 'http://localhost:4000/graphql',
+  cache: new InMemoryCache(),
+});
+
+export const ProgramInput = gql`
+  subscription GetProgramInput {
+    getProgramInput {
+      id
+      description
+    }
+  }
+`;
+
+export const FilesToGenerate = gql`
+  subscription GetFilesToGenerate {
+    getFilesToGenerate {
+      id
+      filename
+    }
+  }
+`;
+
+export const withApolloProvider = Component => props => (
+  <ApolloProvider client={client}>
+    <Component {...props} />
+  </ApolloProvider>
+);
+
+export const useProgramInput = () => {
+  const { data, loading, error } = useQuery(ProgramInput);
+  return { data, loading, error };
+};
+
+export const useFilesToGenerate = () => {
+  const { data, loading, error } = useQuery(FilesToGenerate);
+  return { data, loading, error };
+};
