@@ -1,6 +1,8 @@
 # Supervised Program Synthesis system.
 
-type Query {}
+type Query {
+    programs: [Program!]!
+}
 
 type Mutation {
     createProgram(description: String!): Program!
@@ -40,5 +42,10 @@ type File {
 type Dependency {
     name: String!
     description: String!
-    symbols: Map<String, String>!
+    symbols: [SymbolMap!]!
+}
+
+type SymbolMap {
+  key: String!
+  value: String!
 }

@@ -1,8 +1,7 @@
-```
-deps:
-  brew install go
-  go get github.com/99designs/gqlgen
-
+.PHONY: run-dev
 run-dev: deps
-  go run main.go
-```
+	@go run github.com/tmc/wgo@latest run .
+
+deps:
+	@command -v go > /dev/null || brew install go
+

@@ -1,8 +1,11 @@
-.PHONY: deps run-dev
+.PHONY: run-dev
+run-dev: deps
+	npm run dev
 
+.PHONY: deps
 deps:
 	npm install
-	npm install -g typescript vite
 
-run-dev: deps
-	vite
+.PHONY: watch-codegen
+watch-codegen:
+	npm run graphql-codegen-watch
