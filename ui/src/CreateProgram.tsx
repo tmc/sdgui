@@ -33,8 +33,9 @@ function CreateProgram() {
         loading: {loading ? 'true' : 'false'}<br/>
       </pre>
       <input type="text" value={prompt} onChange={(e) => setPrompt(e.target.value)}
-        style={{width: '400px', height: '30px'}}
+        style={{width: '600px', height: '30px'}}
       />
+      <br/>
       <button onClick={() => createProgram()}>Create Program</button>
       <br/>
       <textarea readOnly value={JSON.stringify(data)} style={{width: '400px', height: '400px'}} />
