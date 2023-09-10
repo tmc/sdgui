@@ -18,6 +18,8 @@ subscription Subscription($observeProgramId: ID!) {
   observeProgram(id: $observeProgramId) {
     id
     description
+    generationStatus
+    generationStatusDetails
     files {
       path
       rationale

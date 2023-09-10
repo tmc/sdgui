@@ -70,10 +70,12 @@ type ComplexityRoot struct {
 	}
 
 	Program struct {
-		Description        func(childComplexity int) int
-		Files              func(childComplexity int) int
-		ID                 func(childComplexity int) int
-		SharedDependencies func(childComplexity int) int
+		Description             func(childComplexity int) int
+		Files                   func(childComplexity int) int
+		GenerationStatus        func(childComplexity int) int
+		GenerationStatusDetails func(childComplexity int) int
+		ID                      func(childComplexity int) int
+		SharedDependencies      func(childComplexity int) int
 	}
 
 	Query struct {
@@ -220,6 +222,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Program.Files(childComplexity), true
+
+	case "Program.generationStatus":
+		if e.complexity.Program.GenerationStatus == nil {
+			break
+		}
+
+		return e.complexity.Program.GenerationStatus(childComplexity), true
+
+	case "Program.generationStatusDetails":
+		if e.complexity.Program.GenerationStatusDetails == nil {
+			break
+		}
+
+		return e.complexity.Program.GenerationStatusDetails(childComplexity), true
 
 	case "Program.id":
 		if e.complexity.Program.ID == nil {
@@ -442,9 +458,12 @@ type Program {
     description: String!
     files: [File!]
     sharedDependencies: [Dependency!]
+    generationStatus: GenerationStatus!
+    generationStatusDetails: String
 }
 
 enum GenerationStatus {
+    IDLE
     PENDING
     RUNNING
     FINISHED
@@ -1038,6 +1057,10 @@ func (ec *executionContext) fieldContext_Mutation_createProgram(ctx context.Cont
 				return ec.fieldContext_Program_files(ctx, field)
 			case "sharedDependencies":
 				return ec.fieldContext_Program_sharedDependencies(ctx, field)
+			case "generationStatus":
+				return ec.fieldContext_Program_generationStatus(ctx, field)
+			case "generationStatusDetails":
+				return ec.fieldContext_Program_generationStatusDetails(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Program", field.Name)
 		},
@@ -1103,6 +1126,10 @@ func (ec *executionContext) fieldContext_Mutation_regenerateProgram(ctx context.
 				return ec.fieldContext_Program_files(ctx, field)
 			case "sharedDependencies":
 				return ec.fieldContext_Program_sharedDependencies(ctx, field)
+			case "generationStatus":
+				return ec.fieldContext_Program_generationStatus(ctx, field)
+			case "generationStatusDetails":
+				return ec.fieldContext_Program_generationStatusDetails(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Program", field.Name)
 		},
@@ -1309,6 +1336,91 @@ func (ec *executionContext) fieldContext_Program_sharedDependencies(ctx context.
 	return fc, nil
 }
 
+func (ec *executionContext) _Program_generationStatus(ctx context.Context, field graphql.CollectedField, obj *model.Program) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Program_generationStatus(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GenerationStatus, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.GenerationStatus)
+	fc.Result = res
+	return ec.marshalNGenerationStatus2githubᚗcomᚋtmcᚋsdguiᚋbackendᚋgraphᚋmodelᚐGenerationStatus(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Program_generationStatus(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Program",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type GenerationStatus does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Program_generationStatusDetails(ctx context.Context, field graphql.CollectedField, obj *model.Program) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Program_generationStatusDetails(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GenerationStatusDetails, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Program_generationStatusDetails(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Program",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_programs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_programs(ctx, field)
 	if err != nil {
@@ -1356,6 +1468,10 @@ func (ec *executionContext) fieldContext_Query_programs(ctx context.Context, fie
 				return ec.fieldContext_Program_files(ctx, field)
 			case "sharedDependencies":
 				return ec.fieldContext_Program_sharedDependencies(ctx, field)
+			case "generationStatus":
+				return ec.fieldContext_Program_generationStatus(ctx, field)
+			case "generationStatusDetails":
+				return ec.fieldContext_Program_generationStatusDetails(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Program", field.Name)
 		},
@@ -1553,6 +1669,10 @@ func (ec *executionContext) fieldContext_Subscription_observeProgram(ctx context
 				return ec.fieldContext_Program_files(ctx, field)
 			case "sharedDependencies":
 				return ec.fieldContext_Program_sharedDependencies(ctx, field)
+			case "generationStatus":
+				return ec.fieldContext_Program_generationStatus(ctx, field)
+			case "generationStatusDetails":
+				return ec.fieldContext_Program_generationStatusDetails(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Program", field.Name)
 		},
@@ -3836,6 +3956,13 @@ func (ec *executionContext) _Program(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = ec._Program_files(ctx, field, obj)
 		case "sharedDependencies":
 			out.Values[i] = ec._Program_sharedDependencies(ctx, field, obj)
+		case "generationStatus":
+			out.Values[i] = ec._Program_generationStatus(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "generationStatusDetails":
+			out.Values[i] = ec._Program_generationStatusDetails(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

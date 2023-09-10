@@ -14,7 +14,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  */
 const documents = {
     "\nmutation CreateProgram($description: String!) {\n  createProgram(description: $description) {\n    id\n    description\n  }\n}\n": types.CreateProgramDocument,
-    "\nsubscription Subscription($observeProgramId: ID!) {\n  observeProgram(id: $observeProgramId) {\n    id\n    description\n    files {\n      path\n      rationale\n      generationStatus\n      content\n    }\n    sharedDependencies {\n      name\n      description\n      symbols {\n        key\n        value\n      }\n    }\n  }\n}": types.SubscriptionDocument,
+    "\nsubscription Subscription($observeProgramId: ID!) {\n  observeProgram(id: $observeProgramId) {\n    id\n    description\n    generationStatus\n    generationStatusDetails\n    files {\n      path\n      rationale\n      generationStatus\n      content\n    }\n    sharedDependencies {\n      name\n      description\n      symbols {\n        key\n        value\n      }\n    }\n  }\n}": types.SubscriptionDocument,
     "\n  subscription GenericSubscription($prompt: String!) {\n    genericCompletion(prompt: $prompt) {\n      text\n      isLast\n    }\n}\n": types.GenericSubscriptionDocument,
 };
 
@@ -39,7 +39,7 @@ export function graphql(source: "\nmutation CreateProgram($description: String!)
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\nsubscription Subscription($observeProgramId: ID!) {\n  observeProgram(id: $observeProgramId) {\n    id\n    description\n    files {\n      path\n      rationale\n      generationStatus\n      content\n    }\n    sharedDependencies {\n      name\n      description\n      symbols {\n        key\n        value\n      }\n    }\n  }\n}"): (typeof documents)["\nsubscription Subscription($observeProgramId: ID!) {\n  observeProgram(id: $observeProgramId) {\n    id\n    description\n    files {\n      path\n      rationale\n      generationStatus\n      content\n    }\n    sharedDependencies {\n      name\n      description\n      symbols {\n        key\n        value\n      }\n    }\n  }\n}"];
+export function graphql(source: "\nsubscription Subscription($observeProgramId: ID!) {\n  observeProgram(id: $observeProgramId) {\n    id\n    description\n    generationStatus\n    generationStatusDetails\n    files {\n      path\n      rationale\n      generationStatus\n      content\n    }\n    sharedDependencies {\n      name\n      description\n      symbols {\n        key\n        value\n      }\n    }\n  }\n}"): (typeof documents)["\nsubscription Subscription($observeProgramId: ID!) {\n  observeProgram(id: $observeProgramId) {\n    id\n    description\n    generationStatus\n    generationStatusDetails\n    files {\n      path\n      rationale\n      generationStatus\n      content\n    }\n    sharedDependencies {\n      name\n      description\n      symbols {\n        key\n        value\n      }\n    }\n  }\n}"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

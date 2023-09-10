@@ -44,6 +44,8 @@ func NewProgramGenerator(config Config) *ProgramGenerator {
 		},
 	}
 	pg.config.TargetDir = filepath.Join(pg.config.TargetDir, id)
+	pg.config.FilesToGeneratePath = filepath.Join(pg.config.TargetDir, ".files_to_generate.json")
+	pg.config.SharedDepsPath = filepath.Join(pg.config.TargetDir, ".shared_deps.json")
 	return pg
 }
 
@@ -52,6 +54,7 @@ func newID() string {
 }
 
 func (pg *ProgramGenerator) Begin() (*model.Program, error) {
+	pg.Program.GenerationStatus = model.GenerationStatusRunning
 	filesToGenerate, err := pg.GetFilesToGenerate()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get files to generate: %w", err)
@@ -103,6 +106,7 @@ func (pg *ProgramGenerator) GetFilesToGenerate() ([]string, error) {
 	var err error
 
 	flagFilesToGenerate := pg.config.FilesToGeneratePath
+	fmt.Println("checking", flagFilesToGenerate)
 	if flagFilesToGenerate != "" && existsAndNonEmpty(flagFilesToGenerate) {
 		result, err = readStringSliceFromYaml(flagFilesToGenerate)
 		if err != nil {
@@ -197,12 +201,14 @@ func (pg *ProgramGenerator) RunFilePathsLLMCall() (*filepathLLMResponse, error) 
 		fmt.Println("debug mode enabled, dumping prompt")
 		fmt.Println(filesPathsPrompt)
 	}
+	streamResults := ""
 	cr, err := llm.Call(ctx, []schema.ChatMessage{
 		&schema.SystemChatMessage{Content: filesPathsPrompt},
 		&schema.HumanChatMessage{Content: pg.config.Prompt},
 	}, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+		streamResults += string(chunk)
 		fmt.Fprint(os.Stderr, string(chunk))
-
+		pg.Program.GenerationStatusDetails = &streamResults
 		return nil
 	}))
 
@@ -364,7 +370,7 @@ When given their intent, create a complete, exhaustive list of filepaths that th
 
 Your response must be JSON formatted and contain the following keys:
 "filepaths": a list of strings that are the filepaths that the user would write to make the program.
-"reasoning": a list of strings that explain your chain of thought (include 5-10)
+"reasoning": a list of strings that explain your chain of thought (include 1-3)
 
 Do not emit any other output.`
 

@@ -36,9 +36,13 @@ func (r *mutationResolver) createProgram(ctx context.Context, description string
 	r.ProgramGenerators[pg.Program.ID] = pg
 
 	go func() {
-		_, err := pg.Begin()
-		if err != nil {
+		endState := model.GenerationStatusFinished
+		defer func() {
+			pg.Program.GenerationStatus = endState
+		}()
+		if _, err := pg.Begin(); err != nil {
 			fmt.Println("error:", err)
+			endState = model.GenerationStatusFailed
 		}
 	}()
 

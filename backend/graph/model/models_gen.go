@@ -27,10 +27,12 @@ type GenericCompletionChunk struct {
 }
 
 type Program struct {
-	ID                 string        `json:"id"`
-	Description        string        `json:"description"`
-	Files              []*File       `json:"files,omitempty"`
-	SharedDependencies []*Dependency `json:"sharedDependencies,omitempty"`
+	ID                      string           `json:"id"`
+	Description             string           `json:"description"`
+	Files                   []*File          `json:"files,omitempty"`
+	SharedDependencies      []*Dependency    `json:"sharedDependencies,omitempty"`
+	GenerationStatus        GenerationStatus `json:"generationStatus"`
+	GenerationStatusDetails *string          `json:"generationStatusDetails,omitempty"`
 }
 
 type RegenerateProgramInput struct {
@@ -46,6 +48,7 @@ type SymbolMap struct {
 type GenerationStatus string
 
 const (
+	GenerationStatusIdle     GenerationStatus = "IDLE"
 	GenerationStatusPending  GenerationStatus = "PENDING"
 	GenerationStatusRunning  GenerationStatus = "RUNNING"
 	GenerationStatusFinished GenerationStatus = "FINISHED"
@@ -53,6 +56,7 @@ const (
 )
 
 var AllGenerationStatus = []GenerationStatus{
+	GenerationStatusIdle,
 	GenerationStatusPending,
 	GenerationStatusRunning,
 	GenerationStatusFinished,
@@ -61,7 +65,7 @@ var AllGenerationStatus = []GenerationStatus{
 
 func (e GenerationStatus) IsValid() bool {
 	switch e {
-	case GenerationStatusPending, GenerationStatusRunning, GenerationStatusFinished, GenerationStatusFailed:
+	case GenerationStatusIdle, GenerationStatusPending, GenerationStatusRunning, GenerationStatusFinished, GenerationStatusFailed:
 		return true
 	}
 	return false

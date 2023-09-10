@@ -24,7 +24,7 @@ func (r *subscriptionResolver) observeProgram(ctx context.Context, id string) (<
 			select {
 			case <-ctx.Done():
 				return
-			case <-time.After(1 * time.Second):
+			case <-time.After(100 * time.Millisecond):
 				ch <- pg.Program
 			}
 		}
