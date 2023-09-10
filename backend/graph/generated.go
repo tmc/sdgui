@@ -54,10 +54,11 @@ type ComplexityRoot struct {
 	}
 
 	File struct {
-		Content          func(childComplexity int) int
-		GenerationStatus func(childComplexity int) int
-		Path             func(childComplexity int) int
-		Rationale        func(childComplexity int) int
+		Content                 func(childComplexity int) int
+		GenerationStatus        func(childComplexity int) int
+		GenerationStatusDetails func(childComplexity int) int
+		Path                    func(childComplexity int) int
+		Rationale               func(childComplexity int) int
 	}
 
 	GenericCompletionChunk struct {
@@ -164,6 +165,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.File.GenerationStatus(childComplexity), true
+
+	case "File.generationStatusDetails":
+		if e.complexity.File.GenerationStatusDetails == nil {
+			break
+		}
+
+		return e.complexity.File.GenerationStatusDetails(childComplexity), true
 
 	case "File.path":
 		if e.complexity.File.Path == nil {
@@ -434,42 +442,82 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema.graphql", Input: `# Supervised Program Synthesis system.
+	{Name: "../schema.graphql", Input: `"""
+Main schema for the Supervised Program Synthesis system.
+"""
 
 type Query {
+    """List of all programs available."""
     programs: [Program!]!
 }
 
 type Mutation {
+    """Create a new program with a given description."""
     createProgram(description: String!): Program!
+
+    """Regenerate an existing program based on input."""
     regenerateProgram(input: RegenerateProgramInput!): Program!
 }
 
 type Subscription {
+    """Observe changes to a specific program by its ID."""
     observeProgram(id: ID!): Program!
+
+    """Test the subscription feature (used mainly for debugging)."""
     testSubscription: String!
+
+    """Get chunks of generic completion based on a given prompt."""
     genericCompletion(prompt: String!): GenericCompletionChunk
 }
 
+"""
+Represents a chunk of generic completion text.
+"""
 type GenericCompletionChunk {
-  text: String!
-  isLast: Boolean!
+    """The text content of the chunk."""
+    text: String!
+
+    """Flag indicating if this is the last chunk."""
+    isLast: Boolean!
 }
 
+"""
+Input type for regenerating a program.
+"""
 input RegenerateProgramInput {
+    """New description for the program."""
     newDescription: String!
+
+    """IDs of the files to be regenerated."""
     filesToRegenerate: [ID!]!
 }
 
+"""
+Represents a program in the system.
+"""
 type Program {
+    """Unique identifier for the program."""
     id: ID!
+
+    """Brief description of the program."""
     description: String!
+
+    """List of files associated with the program."""
     files: [File!]
+
+    """Shared dependencies across files in the program."""
     sharedDependencies: [Dependency!]
+
+    """Current status of the program's generation process."""
     generationStatus: GenerationStatus!
+
+    """Additional details about the generation status."""
     generationStatusDetails: String
 }
 
+"""
+Enumeration of possible generation statuses.
+"""
 enum GenerationStatus {
     IDLE
     PENDING
@@ -478,23 +526,52 @@ enum GenerationStatus {
     FAILED
 }
 
+"""
+Represents a file in a program.
+"""
 type File {
+    """Path to the file."""
     path: String!
+
+    """Rationale or purpose of the file."""
     rationale: String!
+
+    """Current status of the file's generation process."""
     generationStatus: GenerationStatus!
+
+    """Additional details about the generation status."""
+    generationStatusDetails: String
+
+    """Content of the file."""
     content: String!
 }
 
+"""
+Represents a dependency required by a program.
+"""
 type Dependency {
+    """Name of the dependency."""
     name: String!
+
+    """Brief description of the dependency."""
     description: String!
+
+    """Rationale or purpose for needing the dependency."""
     rationale: String!
+
+    """Map of symbols related to this dependency."""
     symbols: [SymbolMap!]!
 }
 
+"""
+Represents a key-value mapping of symbols.
+"""
 type SymbolMap {
-  key: String!
-  value: String!
+    """Key of the symbol."""
+    key: String!
+
+    """Value of the symbol."""
+    value: String!
 }
 `, BuiltIn: false},
 }
@@ -931,6 +1008,47 @@ func (ec *executionContext) fieldContext_File_generationStatus(ctx context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _File_generationStatusDetails(ctx context.Context, field graphql.CollectedField, obj *model.File) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_File_generationStatusDetails(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GenerationStatusDetails, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_File_generationStatusDetails(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "File",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _File_content(ctx context.Context, field graphql.CollectedField, obj *model.File) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_File_content(ctx, field)
 	if err != nil {
@@ -1331,6 +1449,8 @@ func (ec *executionContext) fieldContext_Program_files(ctx context.Context, fiel
 				return ec.fieldContext_File_rationale(ctx, field)
 			case "generationStatus":
 				return ec.fieldContext_File_generationStatus(ctx, field)
+			case "generationStatusDetails":
+				return ec.fieldContext_File_generationStatusDetails(ctx, field)
 			case "content":
 				return ec.fieldContext_File_content(ctx, field)
 			}
@@ -3863,6 +3983,8 @@ func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "generationStatusDetails":
+			out.Values[i] = ec._File_generationStatusDetails(ctx, field, obj)
 		case "content":
 			out.Values[i] = ec._File_content(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

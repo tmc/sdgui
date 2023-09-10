@@ -8,44 +8,73 @@ import (
 	"strconv"
 )
 
+// Represents a dependency required by a program.
 type Dependency struct {
-	Name        string       `json:"name"`
-	Description string       `json:"description"`
-	Rationale   string       `json:"rationale"`
-	Symbols     []*SymbolMap `json:"symbols"`
+	// Name of the dependency.
+	Name string `json:"name"`
+	// Brief description of the dependency.
+	Description string `json:"description"`
+	// Rationale or purpose for needing the dependency.
+	Rationale string `json:"rationale"`
+	// Map of symbols related to this dependency.
+	Symbols []*SymbolMap `json:"symbols"`
 }
 
+// Represents a file in a program.
 type File struct {
-	Path             string           `json:"path"`
-	Rationale        string           `json:"rationale"`
+	// Path to the file.
+	Path string `json:"path"`
+	// Rationale or purpose of the file.
+	Rationale string `json:"rationale"`
+	// Current status of the file's generation process.
 	GenerationStatus GenerationStatus `json:"generationStatus"`
-	Content          string           `json:"content"`
+	// Additional details about the generation status.
+	GenerationStatusDetails *string `json:"generationStatusDetails,omitempty"`
+	// Content of the file.
+	Content string `json:"content"`
 }
 
+// Represents a chunk of generic completion text.
 type GenericCompletionChunk struct {
-	Text   string `json:"text"`
-	IsLast bool   `json:"isLast"`
+	// The text content of the chunk.
+	Text string `json:"text"`
+	// Flag indicating if this is the last chunk.
+	IsLast bool `json:"isLast"`
 }
 
+// Represents a program in the system.
 type Program struct {
-	ID                      string           `json:"id"`
-	Description             string           `json:"description"`
-	Files                   []*File          `json:"files,omitempty"`
-	SharedDependencies      []*Dependency    `json:"sharedDependencies,omitempty"`
-	GenerationStatus        GenerationStatus `json:"generationStatus"`
-	GenerationStatusDetails *string          `json:"generationStatusDetails,omitempty"`
+	// Unique identifier for the program.
+	ID string `json:"id"`
+	// Brief description of the program.
+	Description string `json:"description"`
+	// List of files associated with the program.
+	Files []*File `json:"files,omitempty"`
+	// Shared dependencies across files in the program.
+	SharedDependencies []*Dependency `json:"sharedDependencies,omitempty"`
+	// Current status of the program's generation process.
+	GenerationStatus GenerationStatus `json:"generationStatus"`
+	// Additional details about the generation status.
+	GenerationStatusDetails *string `json:"generationStatusDetails,omitempty"`
 }
 
+// Input type for regenerating a program.
 type RegenerateProgramInput struct {
-	NewDescription    string   `json:"newDescription"`
+	// New description for the program.
+	NewDescription string `json:"newDescription"`
+	// IDs of the files to be regenerated.
 	FilesToRegenerate []string `json:"filesToRegenerate"`
 }
 
+// Represents a key-value mapping of symbols.
 type SymbolMap struct {
-	Key   string `json:"key"`
+	// Key of the symbol.
+	Key string `json:"key"`
+	// Value of the symbol.
 	Value string `json:"value"`
 }
 
+// Enumeration of possible generation statuses.
 type GenerationStatus string
 
 const (

@@ -16,23 +16,35 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
+/** Represents a dependency required by a program. */
 export type Dependency = {
   __typename?: 'Dependency';
+  /** Brief description of the dependency. */
   description: Scalars['String']['output'];
+  /** Name of the dependency. */
   name: Scalars['String']['output'];
+  /** Rationale or purpose for needing the dependency. */
   rationale: Scalars['String']['output'];
+  /** Map of symbols related to this dependency. */
   symbols: Array<SymbolMap>;
 };
 
+/** Represents a file in a program. */
 export type File = {
   __typename?: 'File';
+  /** Content of the file. */
   content: Scalars['String']['output'];
+  /** Current status of the file's generation process. */
   generationStatus: GenerationStatus;
+  /** Additional details about the generation status. */
   generationStatusDetails?: Maybe<Scalars['String']['output']>;
+  /** Path to the file. */
   path: Scalars['String']['output'];
+  /** Rationale or purpose of the file. */
   rationale: Scalars['String']['output'];
 };
 
+/** Enumeration of possible generation statuses. */
 export enum GenerationStatus {
   Failed = 'FAILED',
   Finished = 'FINISHED',
@@ -41,15 +53,20 @@ export enum GenerationStatus {
   Running = 'RUNNING'
 }
 
+/** Represents a chunk of generic completion text. */
 export type GenericCompletionChunk = {
   __typename?: 'GenericCompletionChunk';
+  /** Flag indicating if this is the last chunk. */
   isLast: Scalars['Boolean']['output'];
+  /** The text content of the chunk. */
   text: Scalars['String']['output'];
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
+  /** Create a new program with a given description. */
   createProgram: Program;
+  /** Regenerate an existing program based on input. */
   regenerateProgram: Program;
 };
 
@@ -63,30 +80,45 @@ export type MutationRegenerateProgramArgs = {
   input: RegenerateProgramInput;
 };
 
+/** Represents a program in the system. */
 export type Program = {
   __typename?: 'Program';
+  /** Brief description of the program. */
   description: Scalars['String']['output'];
+  /** List of files associated with the program. */
   files?: Maybe<Array<File>>;
+  /** Current status of the program's generation process. */
   generationStatus: GenerationStatus;
+  /** Additional details about the generation status. */
   generationStatusDetails?: Maybe<Scalars['String']['output']>;
+  /** Unique identifier for the program. */
   id: Scalars['ID']['output'];
+  /** Shared dependencies across files in the program. */
   sharedDependencies?: Maybe<Array<Dependency>>;
 };
 
+/** Main schema for the Supervised Program Synthesis system. */
 export type Query = {
   __typename?: 'Query';
+  /** List of all programs available. */
   programs: Array<Program>;
 };
 
+/** Input type for regenerating a program. */
 export type RegenerateProgramInput = {
+  /** IDs of the files to be regenerated. */
   filesToRegenerate: Array<Scalars['ID']['input']>;
+  /** New description for the program. */
   newDescription: Scalars['String']['input'];
 };
 
 export type Subscription = {
   __typename?: 'Subscription';
+  /** Get chunks of generic completion based on a given prompt. */
   genericCompletion?: Maybe<GenericCompletionChunk>;
+  /** Observe changes to a specific program by its ID. */
   observeProgram: Program;
+  /** Test the subscription feature (used mainly for debugging). */
   testSubscription: Scalars['String']['output'];
 };
 
@@ -100,9 +132,12 @@ export type SubscriptionObserveProgramArgs = {
   id: Scalars['ID']['input'];
 };
 
+/** Represents a key-value mapping of symbols. */
 export type SymbolMap = {
   __typename?: 'SymbolMap';
+  /** Key of the symbol. */
   key: Scalars['String']['output'];
+  /** Value of the symbol. */
   value: Scalars['String']['output'];
 };
 

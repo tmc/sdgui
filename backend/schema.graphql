@@ -1,39 +1,79 @@
-# Supervised Program Synthesis system.
+"""
+Main schema for the Supervised Program Synthesis system.
+"""
 
 type Query {
+    """List of all programs available."""
     programs: [Program!]!
 }
 
 type Mutation {
+    """Create a new program with a given description."""
     createProgram(description: String!): Program!
+
+    """Regenerate an existing program based on input."""
     regenerateProgram(input: RegenerateProgramInput!): Program!
 }
 
 type Subscription {
+    """Observe changes to a specific program by its ID."""
     observeProgram(id: ID!): Program!
+
+    """Test the subscription feature (used mainly for debugging)."""
     testSubscription: String!
+
+    """Get chunks of generic completion based on a given prompt."""
     genericCompletion(prompt: String!): GenericCompletionChunk
 }
 
+"""
+Represents a chunk of generic completion text.
+"""
 type GenericCompletionChunk {
-  text: String!
-  isLast: Boolean!
+    """The text content of the chunk."""
+    text: String!
+
+    """Flag indicating if this is the last chunk."""
+    isLast: Boolean!
 }
 
+"""
+Input type for regenerating a program.
+"""
 input RegenerateProgramInput {
+    """New description for the program."""
     newDescription: String!
+
+    """IDs of the files to be regenerated."""
     filesToRegenerate: [ID!]!
 }
 
+"""
+Represents a program in the system.
+"""
 type Program {
+    """Unique identifier for the program."""
     id: ID!
+
+    """Brief description of the program."""
     description: String!
+
+    """List of files associated with the program."""
     files: [File!]
+
+    """Shared dependencies across files in the program."""
     sharedDependencies: [Dependency!]
+
+    """Current status of the program's generation process."""
     generationStatus: GenerationStatus!
+
+    """Additional details about the generation status."""
     generationStatusDetails: String
 }
 
+"""
+Enumeration of possible generation statuses.
+"""
 enum GenerationStatus {
     IDLE
     PENDING
@@ -42,22 +82,50 @@ enum GenerationStatus {
     FAILED
 }
 
+"""
+Represents a file in a program.
+"""
 type File {
+    """Path to the file."""
     path: String!
+
+    """Rationale or purpose of the file."""
     rationale: String!
+
+    """Current status of the file's generation process."""
     generationStatus: GenerationStatus!
+
+    """Additional details about the generation status."""
     generationStatusDetails: String
+
+    """Content of the file."""
     content: String!
 }
 
+"""
+Represents a dependency required by a program.
+"""
 type Dependency {
+    """Name of the dependency."""
     name: String!
+
+    """Brief description of the dependency."""
     description: String!
+
+    """Rationale or purpose for needing the dependency."""
     rationale: String!
+
+    """Map of symbols related to this dependency."""
     symbols: [SymbolMap!]!
 }
 
+"""
+Represents a key-value mapping of symbols.
+"""
 type SymbolMap {
-  key: String!
-  value: String!
+    """Key of the symbol."""
+    key: String!
+
+    """Value of the symbol."""
+    value: String!
 }
