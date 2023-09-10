@@ -13,6 +13,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
+    "\nmutation CreateProgram($description: String!) {\n  createProgram(description: $description) {\n    id\n    description\n  }\n}\n": types.CreateProgramDocument,
     "\n  subscription GenericSubscription($prompt: String!) {\n    genericCompletion(prompt: $prompt) {\n      text\n      isLast\n    }\n}\n": types.GenericSubscriptionDocument,
 };
 
@@ -30,6 +31,10 @@ const documents = {
  */
 export function graphql(source: string): unknown;
 
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\nmutation CreateProgram($description: String!) {\n  createProgram(description: $description) {\n    id\n    description\n  }\n}\n"): (typeof documents)["\nmutation CreateProgram($description: String!) {\n  createProgram(description: $description) {\n    id\n    description\n  }\n}\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

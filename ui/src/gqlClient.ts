@@ -4,7 +4,7 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
 
-const BASE_GRAPHQL_URL = 'http://localhost:4000/'
+const BASE_GRAPHQL_URL = 'http://localhost:8080/graphql'
 const BASE_GRAPHQL_SUBSCRIPTIONS_URL = 'ws://localhost:8080/graphql'
 
 const httpLink = new HttpLink({

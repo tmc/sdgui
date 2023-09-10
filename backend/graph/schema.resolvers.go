@@ -14,7 +14,10 @@ import (
 
 // CreateProgram is the resolver for the createProgram field.
 func (r *mutationResolver) CreateProgram(ctx context.Context, description string) (*model.Program, error) {
-	panic(fmt.Errorf("not implemented: CreateProgram - createProgram"))
+	return &model.Program{
+		ID:          "1",
+		Description: description,
+	}, nil
 }
 
 // RegenerateProgram is the resolver for the regenerateProgram field.
