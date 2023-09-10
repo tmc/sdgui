@@ -42,7 +42,7 @@ subscription Subscription($observeProgramId: ID!) {
 
 function CreateProgram() {
   // we'll run/restart the subscription when the prompt changes (with a debounce).
-  const [prompt, setPrompt] = useState("write a a program to print hello world in python");
+  const [prompt, setPrompt] = useState("write a simple flask app");
   // result accumulator:
   const [result, setResult] = useState("");
 
@@ -92,28 +92,17 @@ function CreateProgram() {
   // use tailwind to render a basic input box and a text box below it that shows results.
   return (
     <div style={{fontSize: 'small'}}>
-      <pre>
-        loading: {loading ? 'true' : 'false'}<br/>
-      </pre>
       <input type="text" value={prompt} onChange={(e) => setPrompt(e.target.value)}
-        style={{width: '600px', height: '30px'}}
+        style={{width: '640px', height: '30px'}}
       />
-      <br/>
       <Button onClick={() => createProgram()}>Create Program</Button>
       <br/>
-      <textarea readOnly value={JSON.stringify(data)} style={{width: '800px', height: '40px'}} />
       <br/>
-      <textarea readOnly value={JSON.stringify(subscriptionData)} style={{width: '800px', height: '220px'}} />
+      <textarea readOnly value={JSON.stringify(subscriptionData, null, 2)} style={{width: '800px', height: '220px'}} />
       <br/>
-      <textarea readOnly value={JSON.stringify(subscriptionData?.files)} style={{width: '800px', height: '620px'}} />
+      <textarea readOnly value={JSON.stringify(subscriptionData?.files, null, 2)} style={{width: '800px', height: '620px'}} />
       <br/>
       <div style={{width: '300px', height: '400px', border: '1px solid #ccc'}}>
-        <Tree
-          data={treeData}
-          folderIcon={Folder}
-          itemIcon={Workflow}
-          onSelectChange={handleTreeSelect}
-        />
       </div>
     </div>
   );
