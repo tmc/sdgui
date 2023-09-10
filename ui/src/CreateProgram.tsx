@@ -52,6 +52,7 @@ function CreateProgram() {
   console.log('data', data, 'loading', loading, 'error', error);
 
   const [subscriptionData, setSubscriptionData] = useState(null);
+  const [filesPaths, setFilePaths] = useState([]);
 
   const subinfo = useSubscription(observeProgramSubscription, {
     variables: {
@@ -78,9 +79,11 @@ function CreateProgram() {
       <br/>
       <button onClick={() => createProgram()}>Create Program</button>
       <br/>
-      <textarea readOnly value={JSON.stringify(data)} style={{width: '400px', height: '120px'}} />
+      <textarea readOnly value={JSON.stringify(data)} style={{width: '800px', height: '120px'}} />
       <br/>
-      <textarea readOnly value={JSON.stringify(subscriptionData)} style={{width: '400px', height: '620px'}} />
+      <textarea readOnly value={JSON.stringify(subscriptionData)} style={{width: '800px', height: '220px'}} />
+      <br/>
+      <textarea readOnly value={JSON.stringify(subscriptionData?.files)} style={{width: '800px', height: '620px'}} />
     </div>
 
   );

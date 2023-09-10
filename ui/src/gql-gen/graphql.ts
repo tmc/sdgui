@@ -20,6 +20,7 @@ export type Dependency = {
   __typename?: 'Dependency';
   description: Scalars['String']['output'];
   name: Scalars['String']['output'];
+  rationale: Scalars['String']['output'];
   symbols: Array<SymbolMap>;
 };
 
@@ -27,6 +28,7 @@ export type File = {
   __typename?: 'File';
   content: Scalars['String']['output'];
   generationStatus: GenerationStatus;
+  generationStatusDetails?: Maybe<Scalars['String']['output']>;
   path: Scalars['String']['output'];
   rationale: Scalars['String']['output'];
 };

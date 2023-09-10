@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	github.com/99designs/gqlgen v0.17.37
+	github.com/davecgh/go-spew v1.1.1
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/gorilla/websocket v1.5.0
 	github.com/rs/cors v1.10.0

@@ -7,8 +7,10 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
@@ -54,6 +56,12 @@ func newID() string {
 }
 
 func (pg *ProgramGenerator) Begin() (*model.Program, error) {
+	// create target dir if it doesn't exist:
+	if _, err := os.Stat(pg.config.TargetDir); err != nil && os.IsNotExist(err) {
+		if err := os.MkdirAll(pg.config.TargetDir, 0755); err != nil {
+			return nil, fmt.Errorf("failed to create target directory %v: %w", pg.config.TargetDir, err)
+		}
+	}
 	pg.Program.GenerationStatus = model.GenerationStatusRunning
 	filesToGenerate, err := pg.GetFilesToGenerate()
 	if err != nil {
@@ -64,6 +72,18 @@ func (pg *ProgramGenerator) Begin() (*model.Program, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get shared dependencies: %w", err)
 	}
+	for _, sd := range sharedDeps {
+		dep := &model.Dependency{
+			Name:        sd.Name,
+			Description: sd.Description,
+			Rationale:   sd.Rationale,
+		}
+		for k, v := range sd.Symbols {
+			dep.Symbols = append(dep.Symbols, &model.SymbolMap{Key: k, Value: v})
+		}
+		pg.Program.SharedDependencies = append(pg.Program.SharedDependencies, dep)
+	}
+
 	sharedDepsYaml, err := yaml.Marshal(sharedDeps)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal shared dependencies: %w", err)
@@ -73,7 +93,7 @@ func (pg *ProgramGenerator) Begin() (*model.Program, error) {
 	eg.SetLimit(pg.config.Concurrency)
 	for i, fp := range filesToGenerate {
 		i := i
-		fp := pathInTargetDir(fp, pg.config.TargetDir)
+		fullPath := pathInTargetDir(fp, pg.config.TargetDir)
 
 		// check if already exists:
 		if _, err := os.Stat(fp); err == nil {
@@ -89,7 +109,7 @@ func (pg *ProgramGenerator) Begin() (*model.Program, error) {
 				return fmt.Errorf("failed to create directory %v: %w", filepath.Dir(fp), err)
 			}
 			// call codegen LLM:
-			err := pg.RunCodeGenLLMCall(msg, fp, string(sharedDepsYaml), filesToGenerate)
+			err := pg.RunCodeGenLLMCall(msg, fp, fullPath, string(sharedDepsYaml), filesToGenerate)
 			if err != nil {
 				return fmt.Errorf("failed to run codegen LLM call for %v: %w", fp, err)
 			}
@@ -129,6 +149,13 @@ func (pg *ProgramGenerator) GetFilesToGenerate() ([]string, error) {
 			return nil, fmt.Errorf("failed to write files to generate file: %w", err)
 		}
 	}
+	for _, fp := range result {
+		pg.Program.Files = append(pg.Program.Files, &model.File{
+			Path:             fp,
+			GenerationStatus: model.GenerationStatusPending,
+		})
+	}
+
 	return result, nil
 }
 
@@ -145,9 +172,11 @@ func existsAndNonEmpty(fp string) bool {
 func (pg *ProgramGenerator) GetSharedDependencies(filesToGenerate []string) ([]SharedDependency, error) {
 	var result []SharedDependency
 	var err error
-	flagSharedDeps := pg.config.SharedDepsPath
 
+	fmt.Println("checking", pg.config.SharedDepsPath)
+	flagSharedDeps := pg.config.SharedDepsPath
 	if flagSharedDeps != "" && existsAndNonEmpty(flagSharedDeps) {
+		fmt.Println("found, reading from file")
 		result, err = readSharedDependenciesFromYaml(flagSharedDeps)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read shared dependencies from yaml: %w", err)
@@ -219,13 +248,6 @@ func (pg *ProgramGenerator) RunFilePathsLLMCall() (*filepathLLMResponse, error) 
 	if err = json.Unmarshal(findJSON(cr.Content), result); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response: %w\nRaw output: %v", err, cr.Content)
 	}
-	for _, fp := range result.Filepaths {
-		pg.Program.Files = append(pg.Program.Files, &model.File{
-			Path:             fp,
-			GenerationStatus: model.GenerationStatusPending,
-		})
-	}
-
 	return result, nil
 }
 
@@ -237,6 +259,7 @@ type sharedDependenciesLLMResponse struct {
 type SharedDependency struct {
 	Name        string            `json:"name"`
 	Description string            `json:"description"`
+	Rationale   string            `json:"rationale"`
 	Symbols     map[string]string `json:"symbols"`
 }
 
@@ -259,11 +282,11 @@ func (pg *ProgramGenerator) RunSharedDependenciesLLMCall(filePaths []string) (*s
 		"prompt":           pg.config.Prompt,
 		"filepaths_string": filePaths,
 		"target_json": emptyJSON(&sharedDependenciesLLMResponse{
-			Reasoning: []string{},
 			SharedDependencies: []SharedDependency{
 				{
 					Name:        "example symbol",
 					Description: "example description",
+					Rationale:   "example rationale",
 				},
 			},
 		}),
@@ -289,8 +312,31 @@ func (pg *ProgramGenerator) RunSharedDependenciesLLMCall(filePaths []string) (*s
 	return result, nil
 }
 
-func (pg *ProgramGenerator) RunCodeGenLLMCall(msg, file, sharedDeps string, filePaths []string) error {
+func (pg *ProgramGenerator) getFileByPath(path string) *model.File {
+	for _, f := range pg.Program.Files {
+		if f.Path == path {
+			return f
+		}
+	}
+	fmt.Println("failed to find file by path", path)
+	spew.Dump(pg.Program)
+	return nil
+}
+
+func (pg *ProgramGenerator) RunCodeGenLLMCall(msg, filePath, fullFilePath, sharedDeps string, filePaths []string) (err error) {
 	//defer spin(msg, "wrote files")()
+	endingStatus := model.GenerationStatusFinished
+	defer func() {
+		if err != nil {
+			endingStatus = model.GenerationStatusFailed
+		}
+	}()
+
+	pg.Program.GenerationStatusDetails = &msg
+
+	pgf := pg.getFileByPath(filePath)
+	pgf.GenerationStatus = model.GenerationStatusRunning
+
 	ctx := context.Background()
 	spt := prompts.NewPromptTemplate(codeGenerationSystemPrompt, []string{"prompt", "filepaths_string", "shared_dependencies"})
 	pt := prompts.NewPromptTemplate(codeGenerationPrompt, []string{"prompt", "filepaths_string", "shared_dependencies", "filename"})
@@ -302,7 +348,7 @@ func (pg *ProgramGenerator) RunCodeGenLLMCall(msg, file, sharedDeps string, file
 		"prompt":              pg.config.Prompt,
 		"filepaths_string":    filePaths,
 		"shared_dependencies": sharedDeps,
-		"filename":            file,
+		"filename":            fullFilePath,
 	}
 	systemPrompt, err := spt.Format(inputs)
 	if err != nil {
@@ -314,22 +360,27 @@ func (pg *ProgramGenerator) RunCodeGenLLMCall(msg, file, sharedDeps string, file
 	}
 
 	// open file for writing:
-	f, err := os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(fullFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		return fmt.Errorf("failed to open file %v: %w", file, err)
+		return fmt.Errorf("failed to open file %v: %w", fullFilePath, err)
 	}
 	defer f.Close()
+
+	contents := new(strings.Builder)
 	_, err = llm.Call(ctx, []schema.ChatMessage{
 		&schema.SystemChatMessage{Content: systemPrompt},
 		&schema.HumanChatMessage{Content: genPrompt},
 	}, llms.WithModel(pg.config.Model), llms.WithStreamingFunc(
 		// Stream writes to file:
 		func(ctx context.Context, chunk []byte) error {
+			contents.Write(chunk)
+			pgf.Content = contents.String()
 			if _, err := f.Write(chunk); err != nil {
-				return fmt.Errorf("failed to write to file %v: %w", file, err)
+				return fmt.Errorf("failed to write to file %v: %w", fullFilePath, err)
 			}
 			return f.Sync()
 		}))
+	pgf.GenerationStatus = endingStatus
 	return err
 }
 
@@ -370,7 +421,7 @@ When given their intent, create a complete, exhaustive list of filepaths that th
 
 Your response must be JSON formatted and contain the following keys:
 "filepaths": a list of strings that are the filepaths that the user would write to make the program.
-"reasoning": a list of strings that explain your chain of thought (include 1-3)
+"reasoning": a list of strings that explain your chain of thought (include 3-5).
 
 Do not emit any other output.`
 
@@ -389,8 +440,8 @@ Now that we have a list of files, we need to understand what dependencies they s
 Please name and briefly describe what is shared between the files we are generating, including exported variables, data schemas, id names of every DOM elements that javascript functions will use, message names, and function names.
 
 Your repsonse must be JSON formatted and contain the following keys:
-"shared_dependencies": a the list of shared dependencies, include a symbol name, a description, and the set of symbols or files. use "name", "description", and "symbols" as the keys.
-"reasoning": a list of strings that explain your chain of thought (include 5-10).
+"shared_dependencies": a the list of shared dependencies, include a symbol name, a description, and the set of symbols or files. use "name", "description", "rationale" and "symbols" as the keys.
+"reasoning": a list of strings that explain your chain of thought (include 3-5).
 The symbols should be a map of symbol name to symbol description.
 
 Your output should be JSON should look like:

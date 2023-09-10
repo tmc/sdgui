@@ -11,6 +11,7 @@ import (
 type Dependency struct {
 	Name        string       `json:"name"`
 	Description string       `json:"description"`
+	Rationale   string       `json:"rationale"`
 	Symbols     []*SymbolMap `json:"symbols"`
 }
 

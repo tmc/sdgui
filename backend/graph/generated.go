@@ -49,6 +49,7 @@ type ComplexityRoot struct {
 	Dependency struct {
 		Description func(childComplexity int) int
 		Name        func(childComplexity int) int
+		Rationale   func(childComplexity int) int
 		Symbols     func(childComplexity int) int
 	}
 
@@ -135,6 +136,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Dependency.Name(childComplexity), true
+
+	case "Dependency.rationale":
+		if e.complexity.Dependency.Rationale == nil {
+			break
+		}
+
+		return e.complexity.Dependency.Rationale(childComplexity), true
 
 	case "Dependency.symbols":
 		if e.complexity.Dependency.Symbols == nil {
@@ -480,6 +488,7 @@ type File {
 type Dependency {
     name: String!
     description: String!
+    rationale: String!
     symbols: [SymbolMap!]!
 }
 
@@ -684,6 +693,50 @@ func (ec *executionContext) _Dependency_description(ctx context.Context, field g
 }
 
 func (ec *executionContext) fieldContext_Dependency_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Dependency",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Dependency_rationale(ctx context.Context, field graphql.CollectedField, obj *model.Dependency) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Dependency_rationale(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Rationale, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Dependency_rationale(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Dependency",
 		Field:      field,
@@ -1327,6 +1380,8 @@ func (ec *executionContext) fieldContext_Program_sharedDependencies(ctx context.
 				return ec.fieldContext_Dependency_name(ctx, field)
 			case "description":
 				return ec.fieldContext_Dependency_description(ctx, field)
+			case "rationale":
+				return ec.fieldContext_Dependency_rationale(ctx, field)
 			case "symbols":
 				return ec.fieldContext_Dependency_symbols(ctx, field)
 			}
@@ -3746,6 +3801,11 @@ func (ec *executionContext) _Dependency(ctx context.Context, sel ast.SelectionSe
 			}
 		case "description":
 			out.Values[i] = ec._Dependency_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "rationale":
+			out.Values[i] = ec._Dependency_rationale(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
