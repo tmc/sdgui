@@ -33,7 +33,6 @@ subscription Subscription($observeProgramId: ID!) {
       }
     }
   }
-
 }`);
 
 
