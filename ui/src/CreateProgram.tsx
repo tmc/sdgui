@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useSubscription, useMutation } from '@apollo/client'
 import './App.css';
 import { graphql } from '../src/gql-gen'
+import { Button } from "@/components/ui/button"
 import { Tree } from './components/Tree.tsx';
 
 const createProgramMutation = graphql(`
@@ -98,7 +99,7 @@ function CreateProgram() {
         style={{width: '600px', height: '30px'}}
       />
       <br/>
-      <button onClick={() => createProgram()}>Create Program</button>
+      <Button onClick={() => createProgram()}>Create Program</Button>
       <br/>
       <textarea readOnly value={JSON.stringify(data)} style={{width: '800px', height: '40px'}} />
       <br/>
