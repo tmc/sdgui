@@ -14,10 +14,7 @@ import (
 
 // CreateProgram is the resolver for the createProgram field.
 func (r *mutationResolver) CreateProgram(ctx context.Context, description string) (*model.Program, error) {
-	return &model.Program{
-		ID:          "1",
-		Description: description,
-	}, nil
+	return r.createProgram(ctx, description)
 }
 
 // RegenerateProgram is the resolver for the regenerateProgram field.
@@ -32,7 +29,7 @@ func (r *queryResolver) Programs(ctx context.Context) ([]*model.Program, error) 
 
 // ObserveProgram is the resolver for the observeProgram field.
 func (r *subscriptionResolver) ObserveProgram(ctx context.Context, id string) (<-chan *model.Program, error) {
-	panic(fmt.Errorf("not implemented: ObserveProgram - observeProgram"))
+	return r.observeProgram(ctx, id)
 }
 
 // TestSubscription is the resolver for the testSubscription field.

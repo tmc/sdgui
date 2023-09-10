@@ -30,9 +30,11 @@ type Program {
     description: String!
     files: [File!]
     sharedDependencies: [Dependency!]
+    generationStatus: GenerationStatus!
 }
 
 enum GenerationStatus {
+    IDLE
     PENDING
     RUNNING
     FINISHED

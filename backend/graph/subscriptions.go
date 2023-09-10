@@ -12,6 +12,26 @@ import (
 	"github.com/tmc/sdgui/backend/graph/model"
 )
 
+func (r *subscriptionResolver) observeProgram(ctx context.Context, id string) (<-chan *model.Program, error) {
+	pg, ok := r.ProgramGenerators[id]
+	if !ok {
+		return nil, fmt.Errorf("unknown program id: %v", id)
+	}
+	ch := make(chan *model.Program, 1)
+	go func() {
+		defer close(ch)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(1 * time.Second):
+				ch <- pg.Program
+			}
+		}
+	}()
+	return ch, nil
+}
+
 func (r *subscriptionResolver) genericCompletion(ctx context.Context, prompt string) (<-chan *model.GenericCompletionChunk, error) {
 	llm, err := openai.NewChat()
 	if err != nil {

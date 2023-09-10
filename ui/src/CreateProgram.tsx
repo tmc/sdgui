@@ -13,6 +13,30 @@ mutation CreateProgram($description: String!) {
 }
 `)
 
+const observeProgramSubscription = graphql(`
+subscription Subscription($observeProgramId: ID!) {
+  observeProgram(id: $observeProgramId) {
+    id
+    description
+    files {
+      path
+      rationale
+      generationStatus
+      content
+    }
+    sharedDependencies {
+      name
+      description
+      symbols {
+        key
+        value
+      }
+    }
+  }
+
+}`);
+
+
 function CreateProgram() {
   // we'll run/restart the subscription when the prompt changes (with a debounce).
   const [prompt, setPrompt] = useState("write a a program to print hello world in python");
@@ -26,6 +50,21 @@ function CreateProgram() {
   })
   console.log('data', data, 'loading', loading, 'error', error);
 
+  const [subscriptionData, setSubscriptionData] = useState(null);
+
+  const subinfo = useSubscription(observeProgramSubscription, {
+    variables: {
+      observeProgramId: data?.createProgram?.id || '0',
+    },
+    onError: (err) => {
+      console.error(err)
+    },
+    onData: (data) => {
+      setSubscriptionData(data.data.data?.observeProgram);
+    },
+  });
+  console.log(subinfo)
+
   // use tailwind to render a basic input box and a text box below it that shows results.
   return (
     <div style={{fontSize: 'small'}}>
@@ -38,7 +77,9 @@ function CreateProgram() {
       <br/>
       <button onClick={() => createProgram()}>Create Program</button>
       <br/>
-      <textarea readOnly value={JSON.stringify(data)} style={{width: '400px', height: '400px'}} />
+      <textarea readOnly value={JSON.stringify(data)} style={{width: '400px', height: '120px'}} />
+      <br/>
+      <textarea readOnly value={JSON.stringify(subscriptionData)} style={{width: '400px', height: '620px'}} />
     </div>
 
   );
