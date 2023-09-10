@@ -7,7 +7,7 @@ import CreateProgram from './CreateProgram.tsx'
 function App() {
   return (
     <>
-      <h1>woot</h1>
+      <h1>sdgui</h1>
       <CreateProgram />
     </>
   )

@@ -100,7 +100,7 @@ function CreateProgram() {
       <br/>
       <button onClick={() => createProgram()}>Create Program</button>
       <br/>
-      <textarea readOnly value={JSON.stringify(data)} style={{width: '800px', height: '120px'}} />
+      <textarea readOnly value={JSON.stringify(data)} style={{width: '800px', height: '40px'}} />
       <br/>
       <textarea readOnly value={JSON.stringify(subscriptionData)} style={{width: '800px', height: '220px'}} />
       <br/>

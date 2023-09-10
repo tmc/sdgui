@@ -96,7 +96,7 @@ func (pg *ProgramGenerator) Begin() (*model.Program, error) {
 		fullPath := pathInTargetDir(fp, pg.config.TargetDir)
 
 		// check if already exists:
-		if _, err := os.Stat(fp); err == nil {
+		if _, err := os.Stat(fullPath); err == nil {
 			fmt.Printf("file %v already exists, skipping\n", fp)
 			continue
 		}
@@ -105,7 +105,7 @@ func (pg *ProgramGenerator) Begin() (*model.Program, error) {
 			fmt.Println(msg)
 
 			// ensure directory exists:
-			if err := os.MkdirAll(filepath.Dir(fp), 0755); err != nil {
+			if err := os.MkdirAll(filepath.Dir(fullPath), 0755); err != nil {
 				return fmt.Errorf("failed to create directory %v: %w", filepath.Dir(fp), err)
 			}
 			// call codegen LLM:
@@ -296,10 +296,13 @@ func (pg *ProgramGenerator) RunSharedDependenciesLLMCall(filePaths []string) (*s
 		return nil, fmt.Errorf("failed to format prompt: %w", err)
 	}
 	fmt.Println(systemPrompt)
+	streamResults := ""
 	generation, err := llm.Call(ctx, []schema.ChatMessage{
 		&schema.SystemChatMessage{Content: systemPrompt},
 	}, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+		streamResults += string(chunk)
 		fmt.Fprint(os.Stderr, string(chunk))
+		pg.Program.GenerationStatusDetails = &streamResults
 		return nil
 	}))
 	if err != nil {
@@ -324,7 +327,6 @@ func (pg *ProgramGenerator) getFileByPath(path string) *model.File {
 }
 
 func (pg *ProgramGenerator) RunCodeGenLLMCall(msg, filePath, fullFilePath, sharedDeps string, filePaths []string) (err error) {
-	//defer spin(msg, "wrote files")()
 	endingStatus := model.GenerationStatusFinished
 	defer func() {
 		if err != nil {
