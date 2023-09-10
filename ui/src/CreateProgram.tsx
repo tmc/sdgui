@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useSubscription, useMutation } from '@apollo/client'
 import './App.css';
 import { graphql } from '../src/gql-gen'
+import { Tree } from './components/Tree.tsx';
 
 const createProgramMutation = graphql(`
 mutation CreateProgram($description: String!) {
@@ -50,7 +51,27 @@ function CreateProgram() {
     },
   })
   console.log('data', data, 'loading', loading, 'error', error);
-
+  const treeData = [
+    { id: "1", name: "Root Node" },
+    {
+      id: "2",
+      name: "Parent Node",
+      children: [
+        { id: "2.1", name: "Child Node 1" },
+        { id: "2.2", name: "Child Node 2" },
+        {
+          id: "2.3",
+          name: "Child Node 3",
+          children: [
+            { id: "2.3.1", name: "Grandchild Node 1" },
+            { id: "2.3.2", name: "Grandchild Node 2" },
+          ],
+        },
+      ],
+    },
+    { id: "3", name: "Another Root Node" },
+  ];
+  
   const [subscriptionData, setSubscriptionData] = useState(null);
   const [filesPaths, setFilePaths] = useState([]);
 
@@ -84,8 +105,16 @@ function CreateProgram() {
       <textarea readOnly value={JSON.stringify(subscriptionData)} style={{width: '800px', height: '220px'}} />
       <br/>
       <textarea readOnly value={JSON.stringify(subscriptionData?.files)} style={{width: '800px', height: '620px'}} />
+      <br/>
+      <div style={{width: '300px', height: '400px', border: '1px solid #ccc'}}>
+        <Tree
+          data={treeData}
+          folderIcon={Folder}
+          itemIcon={Workflow}
+          onSelectChange={handleTreeSelect}
+        />
+      </div>
     </div>
-
   );
 }
 
